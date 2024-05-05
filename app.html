@@ -16,7 +16,7 @@
         <header class="container">
           <hgroup>
             <h1>Csv sounds (v0.0.4)</h1>
-            <p>
+            <div style="font-size: 1.2em;">
                 <ul>
                     <li>
                         R: start record
@@ -28,7 +28,7 @@
                         P: play record
                     </li>
                 </ul>
-            </p>
+            </div>
           </hgroup>
           <nav>
             <ul>
@@ -80,9 +80,9 @@
                     ret.push('<td></td>')
                 } else {
                     if (isTouchScreen) {
-                        ret.push('<td><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
+                        ret.push('<td style="font-size: 2.1em;"><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
                     } else {
-                        ret.push('<td><span class="word-container">' + element + '</span><span class="buttons"></span></td>')
+                        ret.push('<td style="font-size: 2.1em;"><span class="word-container">' + element + '</span><span class="buttons"></span></td>')
                     }
                 }
             }
