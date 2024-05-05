@@ -2,32 +2,65 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <title>Add sound to any cell of the csv file</title>
+        <!-- Pico.css -->
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css"
+        />
     </head>
     <body>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/csv-js@1.0.0/csv.min.js"></script>
-        <div id="app">
+        <!-- Header -->
+        <header class="container">
+          <hgroup>
+            <h1>Csv sounds</h1>
+            <p>
+                <ul>
+                    <li>
+                        R: start record
+                    </li>
+                    <li>
+                        R (again): stop record
+                    </li>
+                    <li>
+                        P: play record
+                    </li>
+                </ul>
+            </p>
+          </hgroup>
+          <nav>
             <ul>
-                <li>
-                    R: start record
-                </li>
-                <li>
-                    R (again): stop record
-                </li>
-                <li>
-                    P: play record
-                </li>
+              <li>
+                <details class="dropdown">
+                  <summary role="button" class="secondary">Theme</summary>
+                  <ul>
+                    <li><a href="#" data-theme-switcher="auto">Auto</a></li>
+                    <li><a href="#" data-theme-switcher="light">Light</a></li>
+                    <li><a href="#" data-theme-switcher="dark">Dark</a></li>
+                  </ul>
+                </details>
+              </li>
             </ul>
-            <input type="text" id="csv-file-url" style="width: 700px"></input>
-            <button id="parse-btn">Parse</button>
-            <button id="download-all">Download all sounds</button>
-            <table id="words" border="solid 1px gray">
-                <thead>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
+          </nav>
+        </header>
+        <!-- ./ Header -->
+
+        <!-- Main -->
+        <main class="container">
+            <div id="app">
+                <input type="text" id="csv-file-url" style="width: 700px"></input>
+                <button id="parse-btn">Parse</button>
+                <button id="download-all">Download all sounds</button>
+                <table id="words" border="solid 1px gray">
+                    <thead>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </main>
     <script>
         const playTemplate = '<svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-play" viewBox="0 0 16 16"><path d="M6 10.117V5.883a.5.5 0 0 1 .757-.429l3.528 2.117a.5.5 0 0 1 0 .858l-3.528 2.117a.5.5 0 0 1-.757-.43z"/> <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/></svg>'
 
@@ -101,10 +134,10 @@
                 } else {
                     currentCell[0] += 1
                 }
-                $('tr td').css({'background-color': ''});
+                $("tr td").css({"background-color": "", "color": "rgb(194, 199, 208)"});
                 const $tr = $('tr').eq(currentCell[0])
                 const $td = $('td', $tr).eq(currentCell[1])
-                $td.css({'background-color':'red'})
+                $td.css({"background-color":"rgb(1, 127, 192)", color: "rgb(255, 255, 255)"})
                 $('html,body').animate({
                     scrollTop: $td.offset().top - $(window).height()/2
                 }, 100);
@@ -112,41 +145,42 @@
 
             const moveUp = function() {
                 if (currentCell[0] == 0) {
-                    console.log('Nope')
+                    // FIXME: Add shape effect on that cell.
+                    console.log("Nope")
                 } else {
                     currentCell[0] -= 1
                 }
-                $('tr td').css({'background-color': ''});
-                const $tr = $('tr').eq(currentCell[0])
-                const $td = $('td', $tr).eq(currentCell[1])
-                $td.css({'background-color':'red'})
-                $('html,body').animate({
+                $("tr td").css({"background-color": "", "color": "rgb(194, 199, 208)"});
+                const $tr = $("tr").eq(currentCell[0])
+                const $td = $("td", $tr).eq(currentCell[1])
+                $td.css({"background-color":"rgb(1, 127, 192)", color: "rgb(255, 255, 255)"})
+                $("html,body").animate({
                     scrollTop: $td.offset().top - $(window).height()/2
                 }, 100);
             }
 
             const moveLeft = function() {
-                $('tr td').css({'background-color': ''});
+                $("tr td").css({"background-color": "", "color": "rgb(194, 199, 208)"});
                 const $tr = $('tr').eq(currentCell[0])
                 if (currentCell[1] == 0) {
-                    console.log('Nope')
+                    console.log("Nope")
                 } else {
                     currentCell[1] -= 1
                 }
-                const $td = $('td', $tr).eq(currentCell[1])
-                $td.css({'background-color':'red'})
+                const $td = $("td", $tr).eq(currentCell[1])
+                $td.css({"background-color":"rgb(1, 127, 192)", color: "rgb(255, 255, 255)"})
             }
 
             const moveRight = function() {
-                $('tr td').css({'background-color': ''});
-                const $tr = $('tr').eq(currentCell[0])
-                if (currentCell[1] === $('td', $tr).length - 1) {
-                    console.log('Nope')
+                $("tr td").css({"background-color": "", "color": "rgb(194, 199, 208)"});
+                const $tr = $("tr").eq(currentCell[0])
+                if (currentCell[1] === $("td", $tr).length - 1) {
+                    console.log("Nope")
                 } else {
                     currentCell[1] += 1
                 }
-                const $td = $('td', $tr).eq(currentCell[1])
-                $td.css({'background-color':'red'})
+                const $td = $("td", $tr).eq(currentCell[1])
+                $td.css({"background-color":"rgb(1, 127, 192)", color: "rgb(255, 255, 255)"})
             }
 
             const playCurrent = function() {
@@ -260,6 +294,87 @@
                     console.log('Error: ' + err);
                 });
             });
+        </script>
+        <script>
+            /*!
+             * Minimal theme switcher
+             *
+             * Pico.css - https://picocss.com
+             * Copyright 2019-2024 - Licensed under MIT
+             */
+
+            const themeSwitcher = {
+              // Config
+              _scheme: "auto",
+              menuTarget: "details.dropdown",
+              buttonsTarget: "a[data-theme-switcher]",
+              buttonAttribute: "data-theme-switcher",
+              rootAttribute: "data-theme",
+              localStorageKey: "picoPreferredColorScheme",
+
+              // Init
+              init() {
+                this.scheme = this.schemeFromLocalStorage;
+                this.initSwitchers();
+              },
+
+              // Get color scheme from local storage
+              get schemeFromLocalStorage() {
+                return window.localStorage?.getItem(this.localStorageKey) ?? this._scheme;
+              },
+
+              // Preferred color scheme
+              get preferredColorScheme() {
+                return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+              },
+
+              // Init switchers
+              initSwitchers() {
+                const buttons = document.querySelectorAll(this.buttonsTarget);
+                buttons.forEach((button) => {
+                  button.addEventListener(
+                    "click",
+                    (event) => {
+                      event.preventDefault();
+                      // Set scheme
+                      this.scheme = button.getAttribute(this.buttonAttribute);
+                      // Close dropdown
+                      document.querySelector(this.menuTarget)?.removeAttribute("open");
+                    },
+                    false
+                  );
+                });
+              },
+
+              // Set scheme
+              set scheme(scheme) {
+                if (scheme == "auto") {
+                  this._scheme = this.preferredColorScheme;
+                } else if (scheme == "dark" || scheme == "light") {
+                  this._scheme = scheme;
+                }
+                this.applyScheme();
+                this.schemeToLocalStorage();
+              },
+
+              // Get scheme
+              get scheme() {
+                return this._scheme;
+              },
+
+              // Apply scheme
+              applyScheme() {
+                document.querySelector("html")?.setAttribute(this.rootAttribute, this.scheme);
+              },
+
+              // Store scheme to local storage
+              schemeToLocalStorage() {
+                window.localStorage?.setItem(this.localStorageKey, this.scheme);
+              },
+            };
+
+            // Init
+            themeSwitcher.init();
         </script>
     </body>
 </html>
