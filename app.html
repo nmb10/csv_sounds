@@ -95,6 +95,12 @@
             // All sounds collection.
             let sounds = {}
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const sourceCsv = urlParams.get("source");
+            if (sourceCsv) {
+                $("#csv-file-url").val(sourceCsv)
+            }
+
             const parse = function(v) {
                 const parsed = CSV.parse(v)
                 for (const elem of parsed) {
