@@ -15,7 +15,7 @@
         <!-- Header -->
         <header class="container">
           <hgroup>
-            <h1>Csv sounds (v0.0.3)</h1>
+            <h1>Csv sounds (v0.0.4)</h1>
             <p>
                 <ul>
                     <li>
@@ -76,7 +76,9 @@
         const csvElemToTr = function(csvElem) {
             const ret = ['<tr>']
             for (const element of csvElem) {
-                if (element !== "") {
+                if (element === "") {
+                    ret.push('<td></td>')
+                } else {
                     if (isTouchScreen) {
                         ret.push('<td><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
                     } else {
