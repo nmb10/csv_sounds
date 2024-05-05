@@ -56,6 +56,10 @@
 
             let isRecording = false
 
+            const isTouchScreen = window.matchMedia("(pointer: coarse)").matches
+
+            alert(isTouchScreen)
+
             // All sounds collection.
             let sounds = {}
 
