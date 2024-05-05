@@ -33,16 +33,19 @@
 
         const micTemplate = '<svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16"> <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/> <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/> </svg>'
 
-        var wordToRow = function(wordElem) {
-            return '<tr id="' + wordElem.record[1] + '">'
-                + '<td>' + wordElem.record[1] + '</td>'
-            + '</tr>'
-        }
+
+        const isTouchScreen = window.matchMedia("(pointer: coarse)").matches
+        // isTouchScreen = true
 
         const csvElemToTr = function(csvElem) {
             const ret = ['<tr>']
+
             for (const element of csvElem) {
-                ret.push('<td>' + element + '</td>')
+                if (isTouchScreen) {
+                    ret.push('<td><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
+                } else {
+                    ret.push('<td><span class="word-container">' + element + '</span><span class="buttons"></span></td>')
+                }
             }
             ret.push('</tr>')
             return ret.join('')
@@ -55,10 +58,6 @@
             let currentCell = [0, 0]
 
             let isRecording = false
-
-            const isTouchScreen = window.matchMedia("(pointer: coarse)").matches
-
-            alert(isTouchScreen)
 
             // All sounds collection.
             let sounds = {}
@@ -154,12 +153,88 @@
                 const $tr = $('tr').eq(currentCell[0])
                 const $td = $('td', $tr).eq(currentCell[1])
 
-                const word = $td.text().trim()
+                const word = $("span.word-container", $td).text().trim()
                 let audioChunks = sounds[word]
-                const blobObj = new Blob(audioChunks, { type: 'audio/webm' })
+                const blobObj = new Blob(audioChunks, { type: "audio/webm" })
                 const audioUrl = URL.createObjectURL(blobObj)
                 const audio = new Audio(audioUrl)
                 audio.play()
+            }
+
+            const registerKeyboardHandlers = function(audioRecorder1) {
+                $(document).on("keydown", function(event) {
+                    if (event.which === 74) {
+                        // j, move down
+                        moveDown()
+                    } else if (event.which === 75) {
+                        // k, move up
+                        moveUp()
+                    } else if (event.which === 72) {
+                        // h, move left
+                        moveLeft()
+                    } else if (event.which === 76) {
+                        // l, move right
+                        moveRight()
+                    } else if (event.which === 80) {
+                        playCurrent()
+                    } else if (event.which === 82) {
+                        // r,start or stop recording.
+                        if (isRecording) {
+                            isRecording = false
+                            $("#mic-icon").remove()
+                            $("#record-flag").remove()
+                            audioRecorder1.stop()
+                        } else {
+                            isRecording = true
+                            const $tr = $('tr').eq(currentCell[0])
+                            const $currentCell = $("td", $tr).eq(currentCell[1])
+                            const $mic = $(micTemplate)
+                            $mic.appendTo($currentCell)
+                            // If recording starts immediately buttons sound will be recorded as well,
+                            // so start recording after a while.
+                            const startRecording = function() {
+                                $("<span id=\"record-flag\">Speak!</span>").appendTo($currentCell)
+                                audioRecorder1.start()
+                            }
+                            setTimeout(startRecording, 500)
+                            // audioRecorder1.start()
+
+                            // Do not allow to record too long sounds.
+                            setTimeout(function() {$("#record-flag").remove(), audioRecorder1.stop()}, 10000)
+                        }
+                    }
+                }) // onkeydown finish
+            }
+
+            const registerTouchScreenHandlers = function(audioRecorder1) {
+                $(document).on("click", ".record", function() {
+                    const $tr = $(this).closest('tr')
+                    currentCell[0] = $tr.index()
+                    const $currentCell = $(this).closest("td")
+                    currentCell[1] = $currentCell.index()
+                    if (isRecording) {
+                        isRecording = false
+                        $("#mic-icon").remove()
+                        $("#record-flag").remove()
+                        audioRecorder1.stop()
+                    } else {
+                        isRecording = true
+                        $(micTemplate).appendTo($currentCell)
+                        $("<span id=\"record-flag\">Speak!</span>").appendTo($currentCell)
+                        audioRecorder1.start()
+                        // Do not allow to record too long sounds.
+                        setTimeout(function() {$("#record-flag").remove(), audioRecorder1.stop()}, 10000)
+                    }
+                    console.log(sounds)
+                })
+
+                $(document).on("click", ".play-icon", function() {
+                    const $tr = $(this).closest('tr')
+                    currentCell[0] = $tr.index()
+                    const $currentCell = $(this).closest("td")
+                    currentCell[1] = $currentCell.index()
+                    playCurrent()
+                })
             }
 
             navigator.mediaDevices.getUserMedia({ audio: true })
@@ -170,53 +245,16 @@
                         // recording stopped, data ready
                         const $tr = $("tr").eq(currentCell[0])
                         const $td = $("td", $tr).eq(currentCell[1])
-                        $(playTemplate).appendTo($td)
-                        const word = $td.text().trim()
+                        $(playTemplate).appendTo($(".buttons", $td))
+                        const word = $("span.word-container", $td).text().trim()
                         sounds[word] = [e.data]
                     });
 
-                    $(document).on("keydown", function(event) {
-                        if (event.which === 74) {
-                            // j, move down
-                            moveDown()
-                        } else if (event.which === 75) {
-                            // k, move up
-                            moveUp()
-                        } else if (event.which === 72) {
-                            // h, move left
-                            moveLeft()
-                        } else if (event.which === 76) {
-                            // l, move right
-                            moveRight()
-                        } else if (event.which === 80) {
-                            playCurrent()
-                        } else if (event.which === 82) {
-                            // r,start or stop recording.
-                            if (isRecording) {
-                                isRecording = false
-                                $("#mic-icon").remove()
-                                $("#record-flag").remove()
-                                audioRecorder.stop()
-                            } else {
-                                isRecording = true
-                                const $tr = $('tr').eq(currentCell[0])
-                                const $currentCell = $("td", $tr).eq(currentCell[1])
-                                const $mic = $(micTemplate)
-                                $mic.appendTo($currentCell)
-                                // If recording starts immediately buttons sound will be recorded as well,
-                                // so start recording after a while.
-                                const startRecording = function() {
-                                    $("<span id=\"record-flag\">Now!</span>").appendTo($currentCell)
-                                    audioRecorder.start()
-                                }
-                                setTimeout(startRecording, 500)
-                                // audioRecorder.start()
-
-                                // Do not allow to record too long sounds.
-                                setTimeout(function() {$("#record-flag").remove(), audioRecorder.stop()}, 10000)
-                            }
-                        }
-                    });
+                    if (isTouchScreen) {
+                        registerTouchScreenHandlers(audioRecorder)
+                    } else {
+                        registerKeyboardHandlers(audioRecorder)
+                    }
                 }).catch(err => {
                     // If the user denies permission to record audio, then display an error.
                     console.log('Error: ' + err);
