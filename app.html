@@ -75,12 +75,13 @@
 
         const csvElemToTr = function(csvElem) {
             const ret = ['<tr>']
-
             for (const element of csvElem) {
-                if (isTouchScreen) {
-                    ret.push('<td><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
-                } else {
-                    ret.push('<td><span class="word-container">' + element + '</span><span class="buttons"></span></td>')
+                if (element !== "") {
+                    if (isTouchScreen) {
+                        ret.push('<td><span class="buttons"><button class="record">R</button></span><span class="word-container">' + element + '</span></td>')
+                    } else {
+                        ret.push('<td><span class="word-container">' + element + '</span><span class="buttons"></span></td>')
+                    }
                 }
             }
             ret.push('</tr>')
