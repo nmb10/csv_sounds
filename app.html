@@ -119,6 +119,23 @@
                 alert(err)
             }
 
+            $(document).on("dblclick", "#words td", function() {
+                const $td = $(this)
+                const tdIndex = $td.index()
+                const trIndex = $td.closest("tr").index()
+                currentCell[0] = trIndex
+                currentCell[1] = tdIndex
+                $("tr td").css(
+                    {"background-color": "",
+                     color: "rgb(194, 199, 208)"});
+                $td.css(
+                    {"background-color":"rgb(1, 127, 192)",
+                     color: "rgb(255, 255, 255)"})
+                $('html,body').animate({
+                    scrollTop: $td.offset().top - $(window).height()/2
+                }, 100);
+            })
+
             $('#download-all').click(function() {
                 const csvFileUrl = $('#csv-file-url').val()
                 const filename = csvFileUrl.split('/').pop()
@@ -207,10 +224,12 @@
                 audio.play()
             }
 
+            let stopRecordTimeoutId
             const registerKeyboardHandlers = function(audioRecorder1) {
                 $(document).on("keydown", function(event) {
                     if (event.which === 74) {
                         // j, move down
+                        // console.log(e.shiftKey)
                         moveDown()
                     } else if (event.which === 75) {
                         // k, move up
@@ -230,23 +249,32 @@
                             $("#mic-icon").remove()
                             $("#record-flag").remove()
                             audioRecorder1.stop()
+                            clearTimeout(stopRecordTimeoutId)
                         } else {
                             isRecording = true
                             const $tr = $('tr').eq(currentCell[0])
                             const $currentCell = $("td", $tr).eq(currentCell[1])
-                            const $mic = $(micTemplate)
-                            $mic.appendTo($currentCell)
+
+                            const stopRecording = function() {
+                                $("#record-flag").remove()
+                                $("#mic-icon").remove()
+                                audioRecorder1.stop()
+                            }
+
                             // If recording starts immediately buttons sound will be recorded as well,
                             // so start recording after a while.
                             const startRecording = function() {
+                                // Reset stop timeout
+                                clearTimeout(stopRecordTimeoutId)
+                                stopRecordTimeoutId = setTimeout(stopRecording, 12000)
+                                const $mic = $(micTemplate)
+                                $mic.appendTo($currentCell)
                                 $("<span id=\"record-flag\">Speak!</span>").appendTo($currentCell)
                                 audioRecorder1.start()
+
                             }
                             setTimeout(startRecording, 500)
                             // audioRecorder1.start()
-
-                            // Do not allow to record too long sounds.
-                            setTimeout(function() {$("#record-flag").remove(), audioRecorder1.stop()}, 10000)
                         }
                     }
                 }) // onkeydown finish
@@ -263,15 +291,26 @@
                         $("#mic-icon").remove()
                         $("#record-flag").remove()
                         audioRecorder1.stop()
+                        clearTimeout(stopRecordTimeoutId)
                     } else {
                         isRecording = true
+
+                        const stopRecording = function() {
+                            console.log(
+                                'Stopping recording because of time limit.')
+                            $("#record-flag").remove()
+                            $("#mic-icon").remove()
+                            audioRecorder1.stop()
+                        }
+
+                        // Reset time when to stop recording.
+                        clearTimeout(stopRecordTimeoutId)
+                        stopRecordTimeoutId = setTimeout(stopRecording, 10000)
                         $(micTemplate).appendTo($currentCell)
                         $("<span id=\"record-flag\">Speak!</span>").appendTo($currentCell)
                         audioRecorder1.start()
-                        // Do not allow to record too long sounds.
-                        setTimeout(function() {$("#record-flag").remove(), audioRecorder1.stop()}, 10000)
+
                     }
-                    console.log(sounds)
                 })
 
                 $(document).on("click", ".play", function() {
