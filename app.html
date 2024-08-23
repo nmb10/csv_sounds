@@ -19,6 +19,11 @@
             <div style="font-size: 1.2em;">
                 <ul>
                     <li>
+                        <label for="author">Author:
+                            <input id="author" />
+                        </label>
+                    </li>
+                    <li>
                         R: start record
                     </li>
                     <li>
@@ -108,6 +113,9 @@
             }
 
             const parse = function(v) {
+                for (const prop of Object.getOwnPropertyNames(sounds)) {
+                  delete sounds[prop];
+                }
                 const parsed = CSV.parse(v)
                 for (const elem of parsed) {
                     $(csvElemToTr(elem)).appendTo($('#words tbody'))
@@ -117,6 +125,10 @@
             const error = function(err) {
                 $('#words tbody tr').empty()
                 alert(err)
+            }
+
+            const sleep = function(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
             }
 
             $(document).on("dblclick", "#words td", function() {
@@ -136,16 +148,36 @@
                 }, 100);
             })
 
+            function pack(blobs, author) {
+              const zip = new JSZip();
+              if (author) {
+                for (const blob of blobs) {
+                  var folder = zip.folder(blob.name);
+                  folder.file(author + ".ogg", blob)
+                }
+              } else {
+                blobs.forEach((blob) => zip.file(blob.name + ".ogg", blob));
+              }
+              return zip.generateAsync({type : "blob"});
+            }
+
             $('#download-all').click(function() {
                 const csvFileUrl = $('#csv-file-url').val()
+                const author = $('#author').val()
                 const filename = csvFileUrl.split('/').pop()
                 const csvFileName = filename.split('.')[0]
+                const folder = csvFileName.replace('_', '/')
+                var blobs = []
                 for (var key of Object.keys(sounds)) {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(sounds[key][0])
-                    a.download = csvFileName + "_" + key + ".ogg";
-                    a.click();
+                    blobs.push(sounds[key][0])
                 }
+                const zipFile = pack(blobs, author)
+                zipFile.then(function(content) {
+                    const a = document.createElement('a')
+                    a.href = URL.createObjectURL(content)
+                    a.download = csvFileName + ".zip";
+                    a.click();
+                })
             })
 
             $('#parse-btn').click(function() {
@@ -296,8 +328,7 @@
                         isRecording = true
 
                         const stopRecording = function() {
-                            console.log(
-                                'Stopping recording because of time limit.')
+                            console.log('Stopping recording because of time limit.')
                             $("#record-flag").remove()
                             $("#mic-icon").remove()
                             audioRecorder1.stop()
@@ -336,6 +367,7 @@
                             $(playTemplate).appendTo($(".buttons", $td))
                         }
                         const word = $("span.word-container", $td).text().trim()
+                        e.data.name = word
                         sounds[word] = [e.data]
                     });
 
@@ -431,5 +463,7 @@
             // Init
             themeSwitcher.init();
         </script>
+        <!-- using JSZip library https://stuk.github.io/jszip/ -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     </body>
 </html>
